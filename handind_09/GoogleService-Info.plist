@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>977653265858-jt5g9mpf1givu1jv1pqt55ige862l1ov.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.977653265858-jt5g9mpf1givu1jv1pqt55ige862l1ov</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAHGMogcr4y7ln-l_VNulGjBmOEaU-H04o</string>
+	<key>GCM_SENDER_ID</key>
+	<string>977653265858</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>dk.kea.app.mandatory9</string>
+	<key>PROJECT_ID</key>
+	<string>newnotebook-10cf4</string>
+	<key>STORAGE_BUCKET</key>
+	<string>newnotebook-10cf4.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:977653265858:ios:1b5cea4b4fa74f736ad25b</string>
+	<key>DATABASE_URL</key>
+	<string>https://newnotebook-10cf4.firebaseio.com</string>
+</dict>
+</plist>
