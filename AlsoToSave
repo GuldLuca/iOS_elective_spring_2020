@@ -1,0 +1,145 @@
+//
+//  TableViewController.swift
+//  mandatory18
+//
+//  Created by admin on 25/06/2020.
+//  Copyright © 2020 kea. All rights reserved.
+//
+
+import UIKit
+import FirebaseCore
+import FirebaseFirestore
+
+
+class TableViewController: UITableViewController {
+    
+    let db = Firestore.firestore()
+    
+    var elements: [Element] = [Element]()
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        tableView.dataSource = self
+        tableView.delegate = self
+        getCollection()
+    }
+    
+    func getCollection() {
+        
+        db.collection("to_do_list")
+            .addSnapshotListener { (querySnapshot, error) in
+            
+            self.elements = []
+            
+            if let e = error {
+                print("Something went wrong. Couldn't get data. \(e)")
+            }
+            else{
+                if let snapshotDocuments = querySnapshot?.documents {
+                    for doc in snapshotDocuments {
+                        let data = doc.data()
+                        if let elementTitle = data["title"] as? String, let elementDescription = data["description"] as? String, let elementAllowed = data["isAllowed"] as? Bool, let elementDate = data["date"] as? String{
+                            let newElement = Element(title: elementTitle, description: elementDescription, isAllowed: elementAllowed, date: elementDate)
+                            self.elements.append(newElement)
+                            print(newElement)
+                            DispatchQueue.main.async {
+                                self.tableView.reloadData()
+                                let indexPath = IndexPath(row: self.elements.count - 1, section: 0)
+                                self.tableView.scrollToRow(at: indexPath, at: . top, animated: false)
+                            }
+                        }
+                    }
+            }
+            }
+        }
+        
+    }
+
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return elements.count
+    }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath){
+        tableView.deselectRow(at: indexPath, animated: true)
+        performSegue(withIdentifier: "detailSegue", sender: indexPath)
+        performSegue(withIdentifier: "addSegue", sender: Any?.self)
+    }
+
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+     
+        let cellIdentifier = "Cell"
+
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as? TableViewCell else{
+            fatalError("The dequeued cell is not an instance of Cell.")
+        }
+        
+        let element = elements[indexPath.row]
+        
+        cell.titleLabel.text = element.title
+
+        return cell
+    }
+
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if  segue.identifier == "detailSegue",
+            let destination = segue.destination as? DetailViewController,
+            let elementIndex = tableView.indexPathForSelectedRow?.row
+        {
+            destination.titleFromSegue = elements[elementIndex].title
+            destination.descriptionFromSegue = elements[elementIndex].description
+            destination.allowedFromSegue = elements[elementIndex].isAllowed
+            destination.dateFromSegue = elements[elementIndex].date
+            
+        }
+        
+        if segue.identifier == "addSegue", let destination = segue.destination as? DetailViewController{
+            
+            destination.titleFromSegue = ""
+            destination.descriptionFromSegue = ""
+            destination.allowedFromSegue = false
+            destination.dateFromSegue = ""
+        }
+        
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        
+        let elementToDelete = elements[indexPath.row]
+        
+        if (editingStyle == UITableViewCell.EditingStyle.delete){
+            
+            elements.remove(at: indexPath.row)
+            
+            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
+            
+            let elementId = elementToDelete.title
+            
+            db.collection("to_do_list").whereField("title", isEqualTo: elementId).getDocuments { (querySnapshot, error) in
+                
+                if let error = error {
+                    print(error)
+                }
+                else{
+                    for document in querySnapshot!.documents {
+                        document.reference.delete()
+                        print("Doc deleted")
+                    }
+                }
+                
+            }
+            
+        }
+        
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+        }
+        
+        
+    }
+}
