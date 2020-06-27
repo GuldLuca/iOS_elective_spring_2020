@@ -1,0 +1,111 @@
+//
+//  DetailViewController.swift
+//  mandatory18
+//
+//  Created by admin on 25/06/2020.
+//  Copyright © 2020 kea. All rights reserved.
+//
+
+import UIKit
+import os.log
+import FirebaseFirestore
+
+class DetailViewController: UIViewController {
+        
+    @IBOutlet weak var elementTitle: UITextField!
+    @IBOutlet weak var elementDescription: UITextView!
+    @IBOutlet weak var elementAllowed: UILabel!
+    
+    @IBOutlet weak var elementDate: UILabel!
+    @IBOutlet weak var datePicker: UIDatePicker!
+    
+    var elements: [Element] = [Element]()
+    
+    let db = Firestore.firestore()
+    
+    var titleFromSegue = ""
+    var descriptionFromSegue = ""
+    var allowedFromSegue = false
+    var dateFromSegue = ""
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        isAllowed()
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        elementTitle.text = titleFromSegue
+        elementDescription.text = descriptionFromSegue
+        elementAllowed.isEnabled = allowedFromSegue
+        elementDate.text = dateFromSegue
+
+    }
+    
+    private func saveElements() {
+        
+        let newElement = Element(title: elementTitle.text ?? "", description: elementDescription.text ?? "", isAllowed: elementAllowed.isEnabled, date: elementDate.text ?? "")
+        
+        elements += [newElement]
+        
+        print("Element saved \(newElement)")
+    
+    }
+    
+
+    func isAllowed(){
+        if elementAllowed.isEnabled{
+            elementAllowed.textColor = UIColor.green
+            elementAllowed.text = "Allowed!"
+        }
+        else{
+            elementAllowed.textColor = UIColor.red
+            elementAllowed.text = "Not allowed"
+        }
+    }
+    
+    @IBAction func addElementBtn(_ sender: UIButton) {
+        addElement()
+    }
+    
+    @IBAction func updateElementBtn(_ sender: Any) {
+        saveElements()
+    }
+    
+    @IBAction func changeDate(_ sender: Any) {
+        let formatter = DateFormatter()
+
+        formatter.dateStyle = DateFormatter.Style.short
+        formatter.timeStyle = DateFormatter.Style.short
+
+        let strDate = formatter.string(from: datePicker.date)
+        elementDate.text = strDate
+    }
+    
+    func addElement(){
+        if let elementTitle = elementTitle.text, let elementDescription = elementDescription.text, let elementAllowed = elementAllowed.text, let elementDate = elementDate.text{
+            db.collection("to_do_list").addDocument(data:[
+                "title" : elementTitle,
+                "description" : elementDescription,
+                "isAllowed" : elementAllowed,
+                "date" : elementDate
+                ])
+            { (error) in
+                if let e = error{
+                    print("Something went wrong. Could'nt save data in FireStore. \(e)")
+                }
+                else{
+                    print("Success! Data saved in FireStore")
+                    
+                    DispatchQueue.main.async {
+                        self.elementTitle.text = ""
+                        self.elementDescription.text = ""
+                        self.elementAllowed.text = ""
+                        self.elementDate.text = ""
+                    }
+                }
+            }
+        }
+        
+    }
+}
